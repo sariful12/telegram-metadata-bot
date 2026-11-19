@@ -190,6 +190,13 @@ def main() -> None:
 
     app = build_app(token)
 
+    # Python 3.12+ no longer creates an event loop implicitly, and
+    # python-telegram-bot's run_webhook() still calls get_event_loop().
+    # Create one explicitly so the webhook starts on every Python
+    # (Render runs Python 3.14, where the implicit loop is gone).
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     log.info("Starting webhook on port %d", port)
     app.run_webhook(listen="0.0.0.0", port=port, url_path=token,
                     webhook_url=webhook_url)
